@@ -64,10 +64,10 @@ public class OpenApiConfiguration {
                         .url("http://localhost:8080")
                         .description("Local Development Environment"),
                 new Server()
-                        .url("https://staging-api.acme-learning.com")
+                        .url("https://staging-api.bluePatitias.com")
                         .description("Staging Environment"),
                 new Server()
-                        .url("https://api.acme-learning.com")
+                        .url("https://api.bluePatitias.com")
                         .description("Production Environment")
         ));
 
