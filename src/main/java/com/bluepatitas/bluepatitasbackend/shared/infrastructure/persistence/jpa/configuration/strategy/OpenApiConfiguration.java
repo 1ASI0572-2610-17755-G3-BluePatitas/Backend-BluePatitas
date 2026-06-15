@@ -48,15 +48,15 @@ public class OpenApiConfiguration {
                         .description(this.applicationDescription)
                         .version(this.applicationVersion)
                         .contact(new Contact()
-                                .name("ACME Learning Center Support")
-                                .email("support@acme-learning.com")
+                                .name("BluePatitas Support")
+                                .email("support@bluepatitas.com")
                                 .url("https://acme-learning.com/support"))
                         .license(new License()
                                 .name("Apache 2.0")
                                 .url("https://www.apache.org/licenses/LICENSE-2.0.html")))
                 .externalDocs(new ExternalDocumentation()
-                        .description("ACME Learning Platform wiki Documentation")
-                        .url("https://acme-learning-platform.wiki.github.io/docs"));
+                        .description("BluePatitias wiki Documentation")
+                        .url("https://github.com/1ASI0572-2610-17755-G3-BluePatitas"));
 
         // Add server configurations
         openApi.servers(List.of(
@@ -72,7 +72,7 @@ public class OpenApiConfiguration {
         ));
 
         // Add a security scheme
-       /*final String securitySchemeName = "bearerAuth";
+       final String securitySchemeName = "bearerAuth";
 
        openApi.addSecurityItem(new SecurityRequirement()
                        .addList(securitySchemeName))
@@ -83,7 +83,7 @@ public class OpenApiConfiguration {
                                        .type(SecurityScheme.Type.HTTP)
                                        .scheme("bearer")
                                        .bearerFormat("JWT")
-                                       .description("JWT Bearer token for API authentication")));*/
+                                       .description("JWT Bearer token for API authentication")));
 
         return openApi;
     }
