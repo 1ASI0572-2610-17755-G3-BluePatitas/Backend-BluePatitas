@@ -30,8 +30,6 @@ public class OpenApiConfiguration {
     @Value("${documentation.application.version}")
     String applicationVersion;
 
-    // Methods
-
     /**
      * Builds the OpenAPI document used by Swagger UI and client generation tools.
      *
@@ -48,15 +46,15 @@ public class OpenApiConfiguration {
                         .description(this.applicationDescription)
                         .version(this.applicationVersion)
                         .contact(new Contact()
-                                .name("ACME Learning Center Support")
-                                .email("support@acme-learning.com")
-                                .url("https://acme-learning.com/support"))
+                                .name("BluePatitas Support")
+                                .email("support@bluepatitas.com")
+                                .url("https://bluepatitas.com/support"))
                         .license(new License()
                                 .name("Apache 2.0")
                                 .url("https://www.apache.org/licenses/LICENSE-2.0.html")))
                 .externalDocs(new ExternalDocumentation()
-                        .description("ACME Learning Platform wiki Documentation")
-                        .url("https://acme-learning-platform.wiki.github.io/docs"));
+                        .description("BluePatitas wiki Documentation")
+                        .url("https://github.com/1ASI0572-2610-17755-G3-BluePatitas"));
 
         // Add server configurations
         openApi.servers(List.of(
@@ -64,26 +62,26 @@ public class OpenApiConfiguration {
                         .url("http://localhost:8080")
                         .description("Local Development Environment"),
                 new Server()
-                        .url("https://staging-api.acme-learning.com")
+                        .url("https://staging-api.bluepatitas.com")
                         .description("Staging Environment"),
                 new Server()
-                        .url("https://api.acme-learning.com")
+                        .url("https://api.bluepatitas.com")
                         .description("Production Environment")
         ));
 
         // Add a security scheme
-       /*final String securitySchemeName = "bearerAuth";
+        final String securitySchemeName = "bearerAuth";
 
-       openApi.addSecurityItem(new SecurityRequirement()
-                       .addList(securitySchemeName))
-               .components(new Components()
-                       .addSecuritySchemes(securitySchemeName,
-                               new SecurityScheme()
-                                       .name(securitySchemeName)
-                                       .type(SecurityScheme.Type.HTTP)
-                                       .scheme("bearer")
-                                       .bearerFormat("JWT")
-                                       .description("JWT Bearer token for API authentication")));*/
+        openApi.addSecurityItem(new SecurityRequirement()
+                        .addList(securitySchemeName))
+                .components(new Components()
+                        .addSecuritySchemes(securitySchemeName,
+                                new SecurityScheme()
+                                        .name(securitySchemeName)
+                                        .type(SecurityScheme.Type.HTTP)
+                                        .scheme("bearer")
+                                        .bearerFormat("JWT")
+                                        .description("JWT Bearer token for API authentication")));
 
         return openApi;
     }

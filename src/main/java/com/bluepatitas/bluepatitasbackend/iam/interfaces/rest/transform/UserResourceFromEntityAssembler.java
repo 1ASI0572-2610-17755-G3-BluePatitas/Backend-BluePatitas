@@ -1,0 +1,18 @@
+package com.bluepatitas.bluepatitasbackend.iam.interfaces.rest.transform;
+
+import com.bluepatitas.bluepatitasbackend.iam.domain.model.aggregates.User;
+import com.bluepatitas.bluepatitasbackend.iam.domain.model.entities.Role;
+import com.bluepatitas.bluepatitasbackend.iam.interfaces.rest.resources.UserResource;
+
+public class UserResourceFromEntityAssembler {
+    public static UserResource toResourceFromEntity(User user) {
+        var roles = user.getRoles().stream().map(Role::getStringName).toList();
+        return new UserResource(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getPhoneNumber(),
+                roles);
+    }
+}
