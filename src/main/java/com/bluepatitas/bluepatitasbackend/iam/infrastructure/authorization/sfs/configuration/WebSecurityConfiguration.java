@@ -105,6 +105,9 @@ public class WebSecurityConfiguration {
                         .requestMatchers(
                                 "/api/v1/authentication/**",
                                 "/api/v1/roles/**",
+                                "/uploads/**",
+                                "/api/monitoring/telemetry/**",
+                                "/api/monitoring/zones/public-list",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",

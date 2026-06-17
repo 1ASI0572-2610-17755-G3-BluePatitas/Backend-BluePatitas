@@ -28,6 +28,9 @@ public class Animal {
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
+    @Column(name = "shelter_id", nullable = false)
+    private UUID shelterId;
+
     /** The common name given to the animal (e.g., "Max", "Luna"). */
     @Column(name = "name", nullable = false, length = 120)
     private String name;
@@ -53,6 +56,12 @@ public class Animal {
     @Column(name = "assigned_perimeter_id")
     private UUID assignedPerimeterId;
 
+    @Column(name = "photo_url", length = 255)
+    private String photoUrl;
+
+    @Column(name = "weight_kg")
+    private Double weightKg;
+
     // ─────────────────────────────────────────────────────────────────────────
     // Constructor
     // ─────────────────────────────────────────────────────────────────────────
@@ -61,13 +70,15 @@ public class Animal {
      * Full constructor for creating a new Animal aggregate.
      *
      * @param id                  unique identifier (must be non-null)
+     * @param shelterId           associated shelter identifier
      * @param name                the animal's name (must be non-blank)
      * @param speciesDetails      taxonomic and age value object
      * @param healthCondition     initial health status
      * @param assignedPerimeterId the perimeter zone UUID, or null if unassigned
+     * @param photoUrl            profile photo URL
      */
-    public Animal(UUID id, String name, SpeciesInfo speciesDetails,
-                  HealthStatus healthCondition, UUID assignedPerimeterId) {
+    public Animal(UUID id, UUID shelterId, String name, SpeciesInfo speciesDetails,
+                  HealthStatus healthCondition, UUID assignedPerimeterId, String photoUrl, Double weightKg) {
         if (id == null) {
             throw new IllegalArgumentException("Animal id must not be null.");
         }
@@ -75,10 +86,18 @@ public class Animal {
             throw new IllegalArgumentException("Animal name must not be blank.");
         }
         this.id = id;
+        this.shelterId = shelterId;
         this.name = name;
         this.speciesDetails = speciesDetails;
         this.healthCondition = healthCondition;
         this.assignedPerimeterId = assignedPerimeterId;
+        this.photoUrl = photoUrl;
+        this.weightKg = weightKg != null ? weightKg : 10.0;
+    }
+
+    public Animal(UUID id, UUID shelterId, String name, SpeciesInfo speciesDetails,
+                  HealthStatus healthCondition, UUID assignedPerimeterId) {
+        this(id, shelterId, name, speciesDetails, healthCondition, assignedPerimeterId, null, 10.0);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -130,5 +149,22 @@ public class Animal {
      */
     public void relocateToPerimeter(UUID perimeterId) {
         this.assignedPerimeterId = perimeterId;
+    }
+
+    public void updatePhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
+    }
+
+    public void updateProfile(String name, SpeciesInfo speciesDetails, String photoUrl, Double weightKg) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Animal name must not be blank.");
+        }
+        if (speciesDetails == null) {
+            throw new IllegalArgumentException("SpeciesDetails must not be null.");
+        }
+        this.name = name;
+        this.speciesDetails = speciesDetails;
+        this.photoUrl = photoUrl;
+        this.weightKg = weightKg != null ? weightKg : 10.0;
     }
 }

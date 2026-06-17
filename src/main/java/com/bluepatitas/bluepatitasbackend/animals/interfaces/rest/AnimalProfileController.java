@@ -3,6 +3,7 @@ package com.bluepatitas.bluepatitasbackend.animals.interfaces.rest;
 import com.bluepatitas.bluepatitasbackend.animals.application.commands.AssignPerimeterCommand;
 import com.bluepatitas.bluepatitasbackend.animals.application.commands.RegisterAnimalCommand;
 import com.bluepatitas.bluepatitasbackend.animals.application.commands.UpdateHealthCommand;
+import com.bluepatitas.bluepatitasbackend.animals.application.commands.UpdateAnimalProfileCommand;
 import com.bluepatitas.bluepatitasbackend.animals.application.services.AnimalManagementService;
 import com.bluepatitas.bluepatitasbackend.animals.domain.model.aggregates.Animal;
 import com.bluepatitas.bluepatitasbackend.animals.domain.model.enumerations.HealthStatus;
@@ -52,7 +53,9 @@ public class AnimalProfileController {
                 request.species(),
                 request.breed(),
                 request.estimatedAgeMonths(),
-                request.assignedPerimeterId()
+                request.assignedPerimeterId(),
+                request.photoUrl(),
+                request.weightKg()
         );
         Animal created = animalManagementService.registerAnimal(command);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
@@ -140,6 +143,37 @@ public class AnimalProfileController {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // PUT /api/animals/{id}
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Updates the general profile details of a registered animal.
+     *
+     * @param id      the UUID of the animal to update
+     * @param request the request body with updated details
+     * @return 200 OK with the updated Animal aggregate
+     */
+    @PutMapping("/{id}")
+    @Operation(summary = "Update animal profile details",
+               description = "Updates the general profile details of an existing animal (name, species, breed, estimated age, photo url).")
+    public ResponseEntity<Animal> updateAnimalProfile(
+            @PathVariable UUID id,
+            @RequestBody UpdateAnimalProfileRequest request) {
+
+        UpdateAnimalProfileCommand command = new UpdateAnimalProfileCommand(
+                id,
+                request.name(),
+                request.species(),
+                request.breed(),
+                request.estimatedAgeMonths(),
+                request.photoUrl(),
+                request.weightKg()
+        );
+        Animal updated = animalManagementService.updateAnimalProfile(command);
+        return ResponseEntity.ok(updated);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // Inner Request DTOs
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -149,7 +183,9 @@ public class AnimalProfileController {
             String species,
             String breed,
             Integer estimatedAgeMonths,
-            UUID assignedPerimeterId
+            UUID assignedPerimeterId,
+            String photoUrl,
+            Double weightKg
     ) {}
 
     /** Request body for PUT /api/animals/{id}/health. */
@@ -157,4 +193,14 @@ public class AnimalProfileController {
 
     /** Request body for PUT /api/animals/{id}/perimeter. */
     public record AssignPerimeterRequest(UUID perimeterId) {}
+
+    /** Request body for PUT /api/animals/{id}. */
+    public record UpdateAnimalProfileRequest(
+            String name,
+            String species,
+            String breed,
+            Integer estimatedAgeMonths,
+            String photoUrl,
+            Double weightKg
+    ) {}
 }

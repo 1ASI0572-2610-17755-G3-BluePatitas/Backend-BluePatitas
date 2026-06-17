@@ -89,6 +89,13 @@ public class ShelterMonitoringController {
         return ResponseEntity.ok(zones);
     }
 
+    @GetMapping("/zones/public-list")
+    @Operation(summary = "Get all monitoring zones without auth", description = "Retrieves all monitoring zones for edge devices.")
+    public ResponseEntity<List<MonitoringZone>> getPublicZonesList() {
+        List<MonitoringZone> zones = shelterMonitoringService.getMonitoringZonesWithoutAuth();
+        return ResponseEntity.ok(zones);
+    }
+
     @PostMapping("/zones")
     @Operation(summary = "Create a monitoring zone", description = "Registers a new monitoring zone.")
     public ResponseEntity<MonitoringZone> createMonitoringZone(@Valid @RequestBody ZoneRequest request) {
@@ -100,7 +107,9 @@ public class ShelterMonitoringController {
                 request.status() != null ? request.status() : "Active",
                 request.animalCount() != null ? request.animalCount() : 0,
                 request.cameraEnabled() != null ? request.cameraEnabled() : true,
-                request.imageUrl()
+                request.imageUrl(),
+                request.minTemperatureC(),
+                request.maxTemperatureC()
         );
         MonitoringZone saved = shelterMonitoringService.createMonitoringZone(command);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
@@ -127,6 +136,8 @@ public class ShelterMonitoringController {
             String status,
             Integer animalCount,
             Boolean cameraEnabled,
-            String imageUrl
+            String imageUrl,
+            Double minTemperatureC,
+            Double maxTemperatureC
     ) {}
 }

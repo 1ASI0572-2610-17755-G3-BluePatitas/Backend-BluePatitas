@@ -12,5 +12,7 @@ import java.util.UUID;
 public interface MonitoringZoneRepository {
     MonitoringZone save(MonitoringZone monitoringZone);
     Optional<MonitoringZone> findById(UUID id);
+    Optional<MonitoringZone> findByTargetId(UUID targetId);
     List<MonitoringZone> findAll();
+    List<MonitoringZone> findAllByShelterId(UUID shelterId);
 }

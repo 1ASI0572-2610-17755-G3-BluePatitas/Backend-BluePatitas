@@ -29,7 +29,17 @@ public class RelationalMonitoringZoneRepository implements MonitoringZoneReposit
     }
 
     @Override
+    public Optional<MonitoringZone> findByTargetId(UUID targetId) {
+        return jpaMonitoringZoneRepository.findByTargetId(targetId);
+    }
+
+    @Override
     public List<MonitoringZone> findAll() {
         return jpaMonitoringZoneRepository.findAll();
+    }
+
+    @Override
+    public List<MonitoringZone> findAllByShelterId(UUID shelterId) {
+        return jpaMonitoringZoneRepository.findAllByShelterId(shelterId);
     }
 }
