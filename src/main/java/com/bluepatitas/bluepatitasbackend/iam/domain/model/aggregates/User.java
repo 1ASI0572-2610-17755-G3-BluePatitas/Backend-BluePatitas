@@ -12,6 +12,7 @@ import lombok.Setter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * User aggregate root
@@ -62,6 +63,10 @@ public class User extends AbstractDomainAggregateRoot<User> {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles;
+
+    @Column(name = "shelter_id")
+    private UUID shelterId;
+
 
     public User() {
         this.roles = new HashSet<>();

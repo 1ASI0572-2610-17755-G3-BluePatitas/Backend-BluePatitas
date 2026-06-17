@@ -3,6 +3,8 @@ package com.bluepatitas.bluepatitasbackend.monitoring.application.services;
 import com.bluepatitas.bluepatitasbackend.monitoring.application.commands.ProcessTelemetryCommand;
 import com.bluepatitas.bluepatitasbackend.monitoring.application.queries.AnalyzeVisualDataQuery;
 import com.bluepatitas.bluepatitasbackend.monitoring.domain.model.aggregates.TelemetryRecord;
+import com.bluepatitas.bluepatitasbackend.monitoring.domain.model.aggregates.MonitoringZone;
+import com.bluepatitas.bluepatitasbackend.monitoring.domain.model.repositories.MonitoringZoneRepository;
 import com.bluepatitas.bluepatitasbackend.monitoring.domain.model.repositories.TelemetryRepository;
 import com.bluepatitas.bluepatitasbackend.monitoring.domain.model.valueobjects.EnvironmentalMetrics;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ import java.util.UUID;
 public class TelemetryAnalysisService {
 
     private final TelemetryRepository telemetryRepository;
+    private final MonitoringZoneRepository monitoringZoneRepository;
 
     // ─────────────────────────────────────────────────────────────────────────
     // Command Handlers (Write Side)
@@ -65,6 +68,49 @@ public class TelemetryAnalysisService {
         // Evaluate visual anomalies
         if (record.hasVisualAnomalies()) {
             log.warn("ALERT: Visual anomaly detected for targetId={}", command.targetId());
+        }
+
+        // Update MonitoringZone real-time telemetry and status
+        if (command.targetId() != null) {
+            monitoringZoneRepository.findByTargetId(command.targetId()).ifPresent(zone -> {
+                if (command.ambientTemperature() != null) {
+                    zone.setTemperatureC(command.ambientTemperature().doubleValue());
+                }
+                if (command.ambientHumidity() != null) {
+                    zone.setHumidity(command.ambientHumidity().doubleValue());
+                }
+
+                // Check limits
+                boolean tempOk = true;
+                boolean humidityOk = true;
+
+                if (command.ambientTemperature() != null) {
+                    double temp = command.ambientTemperature().doubleValue();
+                    if (zone.getMinTemperatureC() != null && temp < zone.getMinTemperatureC()) {
+                        tempOk = false;
+                    }
+                    if (zone.getMaxTemperatureC() != null && temp > zone.getMaxTemperatureC()) {
+                        tempOk = false;
+                    }
+                }
+                if (command.ambientHumidity() != null) {
+                    double humidity = command.ambientHumidity().doubleValue();
+                    if (humidity >= 70.0) {
+                        humidityOk = false;
+                    }
+                }
+
+                boolean statusOk = tempOk && humidityOk && !record.hasVisualAnomalies();
+
+                if (!statusOk) {
+                    zone.setStatus("Warning");
+                } else {
+                    zone.setStatus("Active");
+                }
+                monitoringZoneRepository.save(zone);
+                log.info("Updated MonitoringZone name='{}' targetId={} with temp={} hum={} status={}",
+                        zone.getName(), zone.getTargetId(), zone.getTemperatureC(), zone.getHumidity(), zone.getStatus());
+            });
         }
 
         return telemetryRepository.save(record);

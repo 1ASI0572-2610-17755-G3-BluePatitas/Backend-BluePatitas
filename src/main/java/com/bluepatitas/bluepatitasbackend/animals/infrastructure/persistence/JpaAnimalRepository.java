@@ -40,4 +40,12 @@ public interface JpaAnimalRepository extends JpaRepository<Animal, UUID> {
      * @return true if at least one animal has that name
      */
     boolean existsByName(String name);
+
+    /**
+     * Fetches all animals belonging to a specific shelter.
+     *
+     * @param shelterId the shelter UUID
+     * @return list of animals in that shelter
+     */
+    List<Animal> findAllByShelterId(UUID shelterId);
 }

@@ -61,6 +61,23 @@ public class FeedingPlansController {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // GET /api/feeding/plans
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Retrieves all feeding plans.
+     *
+     * @return 200 OK with the list of all feeding plans
+     */
+    @GetMapping
+    @Operation(summary = "Get all plans",
+               description = "Returns all feeding plans registered in the shelter.")
+    public ResponseEntity<List<FeedingPlan>> getAllPlans() {
+        List<FeedingPlan> plans = feedingPlanCommandHandler.getAllPlans();
+        return ResponseEntity.ok(plans);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // GET /api/feeding/plans/{animalId}
     // ─────────────────────────────────────────────────────────────────────────
 

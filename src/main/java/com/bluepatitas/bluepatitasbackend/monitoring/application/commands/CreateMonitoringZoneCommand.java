@@ -13,6 +13,8 @@ public record CreateMonitoringZoneCommand(
         String status,
         Integer animalCount,
         Boolean cameraEnabled,
-        String imageUrl
+        String imageUrl,
+        Double minTemperatureC,
+        Double maxTemperatureC
 ) {
 }

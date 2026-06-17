@@ -188,6 +188,17 @@ public class FeedingPlanCommandHandler {
     }
 
     /**
+     * Retrieves all feeding plans registered in the platform.
+     *
+     * @return a list of all feeding plans
+     */
+    @Transactional(readOnly = true)
+    public List<FeedingPlan> getAllPlans() {
+        log.info("Fetching all feeding plans.");
+        return feedingPlanRepository.findAll();
+    }
+
+    /**
      * Retrieves a single feeding plan by its unique identifier.
      *
      * @param planId the UUID of the feeding plan

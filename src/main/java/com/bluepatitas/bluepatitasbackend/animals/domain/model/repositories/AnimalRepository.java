@@ -70,4 +70,12 @@ public interface AnimalRepository {
      * @param id the unique identifier of the animal to delete
      */
     void deleteById(UUID id);
+
+    /**
+     * Retrieves all animals belonging to a specific shelter.
+     *
+     * @param shelterId the shelter UUID
+     * @return a list of Animal aggregates in that shelter
+     */
+    List<Animal> findAllByShelterId(UUID shelterId);
 }

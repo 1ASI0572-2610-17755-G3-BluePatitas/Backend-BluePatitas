@@ -76,4 +76,10 @@ public class RelationalAnimalRepository implements AnimalRepository {
         log.debug("Deleting Animal id={}", id);
         jpaAnimalRepository.deleteById(id);
     }
+
+    @Override
+    public List<Animal> findAllByShelterId(UUID shelterId) {
+        log.debug("Fetching animals belonging to shelterId={}", shelterId);
+        return jpaAnimalRepository.findAllByShelterId(shelterId);
+    }
 }

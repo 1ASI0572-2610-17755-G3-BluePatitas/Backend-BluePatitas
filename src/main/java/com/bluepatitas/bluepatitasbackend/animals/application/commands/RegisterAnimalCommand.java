@@ -20,6 +20,8 @@ public record RegisterAnimalCommand(
         String species,
         String breed,
         Integer estimatedAgeMonths,
-        UUID assignedPerimeterId
+        UUID assignedPerimeterId,
+        String photoUrl,
+        Double weightKg
 ) {
 }

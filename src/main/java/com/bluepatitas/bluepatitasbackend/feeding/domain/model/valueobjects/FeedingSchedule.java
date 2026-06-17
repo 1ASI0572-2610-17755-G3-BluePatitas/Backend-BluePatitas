@@ -60,13 +60,17 @@ public record FeedingSchedule(
     public boolean matchesTime(LocalTime time) {
         if (time == null) return false;
         int tolerance = (toleranceMinutes != null) ? toleranceMinutes : 10;
-        return Arrays.stream(scheduledTimes.split(","))
-                .map(String::trim)
-                .map(LocalTime::parse)
-                .anyMatch(slot -> {
-                    long diff = Math.abs(ChronoUnit.MINUTES.between(slot, time));
-                    return diff <= tolerance;
-                });
+        try {
+            return Arrays.stream(scheduledTimes.split(","))
+                    .map(String::trim)
+                    .map(LocalTime::parse)
+                    .anyMatch(slot -> {
+                        long diff = Math.abs(ChronoUnit.MINUTES.between(slot, time));
+                        return diff <= tolerance;
+                    });
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     /**

@@ -22,6 +22,9 @@ public class MonitoringZone extends AbstractDomainAggregateRoot<MonitoringZone> 
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
+    @Column(name = "shelter_id", nullable = false)
+    private UUID shelterId;
+
     @Column(name = "target_id")
     private UUID targetId;
 
@@ -33,6 +36,12 @@ public class MonitoringZone extends AbstractDomainAggregateRoot<MonitoringZone> 
 
     @Column(name = "humidity")
     private Double humidity;
+
+    @Column(name = "min_temperature_c")
+    private Double minTemperatureC;
+
+    @Column(name = "max_temperature_c")
+    private Double maxTemperatureC;
 
     @Column(name = "status", nullable = false, length = 50)
     private String status;
@@ -46,8 +55,9 @@ public class MonitoringZone extends AbstractDomainAggregateRoot<MonitoringZone> 
     @Column(name = "image_url", length = 255)
     private String imageUrl;
 
-    public MonitoringZone(UUID id, UUID targetId, String name, Double temperatureC, Double humidity, String status, Integer animalCount, Boolean cameraEnabled, String imageUrl) {
+    public MonitoringZone(UUID id, UUID shelterId, UUID targetId, String name, Double temperatureC, Double humidity, String status, Integer animalCount, Boolean cameraEnabled, String imageUrl, Double minTemperatureC, Double maxTemperatureC) {
         this.id = id;
+        this.shelterId = shelterId;
         this.targetId = targetId;
         this.name = name;
         this.temperatureC = temperatureC;
@@ -56,5 +66,7 @@ public class MonitoringZone extends AbstractDomainAggregateRoot<MonitoringZone> 
         this.animalCount = animalCount;
         this.cameraEnabled = cameraEnabled;
         this.imageUrl = imageUrl;
+        this.minTemperatureC = minTemperatureC;
+        this.maxTemperatureC = maxTemperatureC;
     }
 }
