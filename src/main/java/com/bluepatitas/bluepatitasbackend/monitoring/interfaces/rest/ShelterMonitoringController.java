@@ -109,10 +109,42 @@ public class ShelterMonitoringController {
                 request.cameraEnabled() != null ? request.cameraEnabled() : true,
                 request.imageUrl(),
                 request.minTemperatureC(),
-                request.maxTemperatureC()
+                request.maxTemperatureC(),
+                request.geofenceLatitude(),
+                request.geofenceLongitude(),
+                request.geofenceRadiusMeters()
         );
         MonitoringZone saved = shelterMonitoringService.createMonitoringZone(command);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
+
+    @PutMapping("/zones/{id}")
+    @Operation(summary = "Update a monitoring zone", description = "Updates an existing monitoring zone configuration.")
+    public ResponseEntity<MonitoringZone> updateMonitoringZone(@PathVariable UUID id, @Valid @RequestBody ZoneRequest request) {
+        CreateMonitoringZoneCommand command = new CreateMonitoringZoneCommand(
+                request.targetId() != null ? UUID.fromString(request.targetId()) : null,
+                request.name(),
+                request.temperatureC(),
+                request.humidity(),
+                request.status(),
+                request.animalCount(),
+                request.cameraEnabled(),
+                request.imageUrl(),
+                request.minTemperatureC(),
+                request.maxTemperatureC(),
+                request.geofenceLatitude(),
+                request.geofenceLongitude(),
+                request.geofenceRadiusMeters()
+        );
+        MonitoringZone updated = shelterMonitoringService.updateMonitoringZone(id, command);
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/zones/{id}")
+    @Operation(summary = "Delete a monitoring zone", description = "Removes a monitoring zone from the shelter configuration.")
+    public ResponseEntity<Void> deleteMonitoringZone(@PathVariable UUID id) {
+        shelterMonitoringService.deleteMonitoringZone(id);
+        return ResponseEntity.noContent().build();
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -138,6 +170,9 @@ public class ShelterMonitoringController {
             Boolean cameraEnabled,
             String imageUrl,
             Double minTemperatureC,
-            Double maxTemperatureC
+            Double maxTemperatureC,
+            Double geofenceLatitude,
+            Double geofenceLongitude,
+            Double geofenceRadiusMeters
     ) {}
 }

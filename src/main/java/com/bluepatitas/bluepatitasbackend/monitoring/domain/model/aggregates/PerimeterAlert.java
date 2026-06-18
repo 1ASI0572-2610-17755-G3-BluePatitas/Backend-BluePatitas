@@ -97,6 +97,15 @@ public class PerimeterAlert {
     }
 
     /**
+     * Updates the last known coordinates of the target.
+     *
+     * @param coordinates the new GPS location coordinates
+     */
+    public void updateCoordinates(LocationContext coordinates) {
+        this.currentCoordinates = coordinates;
+    }
+
+    /**
      * Resolves and closes this alert, deactivating location tracking.
      * Typically called when the target has been safely recovered or
      * returned to the perimeter zone.

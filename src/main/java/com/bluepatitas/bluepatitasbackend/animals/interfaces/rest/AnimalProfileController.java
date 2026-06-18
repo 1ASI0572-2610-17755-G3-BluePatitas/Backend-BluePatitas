@@ -174,6 +174,25 @@ public class AnimalProfileController {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // DELETE /api/animals/{id}
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Deletes an animal by its unique identifier.
+     *
+     * @param id the UUID of the animal to delete
+     * @return 204 No Content, or 404 if not found
+     */
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Delete animal profile",
+               description = "Deletes an existing animal profile from the BluePatitas platform.")
+    public ResponseEntity<Void> deleteAnimal(@PathVariable UUID id) {
+        animalManagementService.deleteAnimal(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // Inner Request DTOs
     // ─────────────────────────────────────────────────────────────────────────
 

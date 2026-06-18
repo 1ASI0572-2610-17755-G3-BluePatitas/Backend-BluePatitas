@@ -43,6 +43,15 @@ public class MonitoringZone extends AbstractDomainAggregateRoot<MonitoringZone> 
     @Column(name = "max_temperature_c")
     private Double maxTemperatureC;
 
+    @Column(name = "geofence_latitude")
+    private Double geofenceLatitude;
+
+    @Column(name = "geofence_longitude")
+    private Double geofenceLongitude;
+
+    @Column(name = "geofence_radius_meters")
+    private Double geofenceRadiusMeters;
+
     @Column(name = "status", nullable = false, length = 50)
     private String status;
 
@@ -55,7 +64,7 @@ public class MonitoringZone extends AbstractDomainAggregateRoot<MonitoringZone> 
     @Column(name = "image_url", length = 255)
     private String imageUrl;
 
-    public MonitoringZone(UUID id, UUID shelterId, UUID targetId, String name, Double temperatureC, Double humidity, String status, Integer animalCount, Boolean cameraEnabled, String imageUrl, Double minTemperatureC, Double maxTemperatureC) {
+    public MonitoringZone(UUID id, UUID shelterId, UUID targetId, String name, Double temperatureC, Double humidity, String status, Integer animalCount, Boolean cameraEnabled, String imageUrl, Double minTemperatureC, Double maxTemperatureC, Double geofenceLatitude, Double geofenceLongitude, Double geofenceRadiusMeters) {
         this.id = id;
         this.shelterId = shelterId;
         this.targetId = targetId;
@@ -68,5 +77,8 @@ public class MonitoringZone extends AbstractDomainAggregateRoot<MonitoringZone> 
         this.imageUrl = imageUrl;
         this.minTemperatureC = minTemperatureC;
         this.maxTemperatureC = maxTemperatureC;
+        this.geofenceLatitude = geofenceLatitude;
+        this.geofenceLongitude = geofenceLongitude;
+        this.geofenceRadiusMeters = geofenceRadiusMeters;
     }
 }

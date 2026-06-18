@@ -147,9 +147,50 @@ public class ShelterMonitoringService {
                 command.cameraEnabled(),
                 command.imageUrl(),
                 command.minTemperatureC(),
-                command.maxTemperatureC()
+                command.maxTemperatureC(),
+                command.geofenceLatitude(),
+                command.geofenceLongitude(),
+                command.geofenceRadiusMeters()
         );
         return monitoringZoneRepository.save(zone);
+    }
+
+    @Transactional
+    public MonitoringZone updateMonitoringZone(UUID id, CreateMonitoringZoneCommand command) {
+        log.info("Updating monitoring zone id='{}'", id);
+        MonitoringZone zone = monitoringZoneRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("MonitoringZone not found with id: " + id));
+        
+        zone.setName(command.name());
+        if (command.targetId() != null) {
+            zone.setTargetId(command.targetId());
+        }
+        zone.setMinTemperatureC(command.minTemperatureC());
+        zone.setMaxTemperatureC(command.maxTemperatureC());
+        zone.setGeofenceLatitude(command.geofenceLatitude());
+        zone.setGeofenceLongitude(command.geofenceLongitude());
+        zone.setGeofenceRadiusMeters(command.geofenceRadiusMeters());
+        
+        if (command.cameraEnabled() != null) {
+            zone.setCameraEnabled(command.cameraEnabled());
+        }
+        if (command.status() != null) {
+            zone.setStatus(command.status());
+        }
+        if (command.animalCount() != null) {
+            zone.setAnimalCount(command.animalCount());
+        }
+        if (command.imageUrl() != null) {
+            zone.setImageUrl(command.imageUrl());
+        }
+        
+        return monitoringZoneRepository.save(zone);
+    }
+
+    @Transactional
+    public void deleteMonitoringZone(UUID id) {
+        log.info("Deleting monitoring zone id='{}'", id);
+        monitoringZoneRepository.deleteById(id);
     }
 
     // ─────────────────────────────────────────────────────────────────────────

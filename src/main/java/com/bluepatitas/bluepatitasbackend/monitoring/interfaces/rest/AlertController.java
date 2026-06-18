@@ -7,8 +7,10 @@ import com.bluepatitas.bluepatitasbackend.monitoring.domain.model.aggregates.Per
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -98,4 +100,32 @@ public class AlertController {
      * Request body for enabling tracking on an existing alert.
      */
     public record EnableTrackingRequest(UUID alertId) {}
+
+    // POST /api/monitoring/alerts/evaluate
+    @PostMapping("/evaluate")
+    @Operation(summary = "Evaluate and confirm perimeter breach",
+               description = "Checks coordinates and registers a confirmed breach alert if target is outside zone.")
+    public ResponseEntity<PerimeterAlert> evaluateBreach(@Valid @RequestBody EvaluateBreachRequest request) {
+        EvaluateBreachCommand command = new EvaluateBreachCommand(
+                request.targetId(),
+                request.latitude(),
+                request.longitude()
+        );
+        PerimeterAlert saved = perimeterAlertService.evaluateAndConfirmBreach(command);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Dismiss (delete) perimeter alert",
+               description = "Removes a perimeter alert from the system permanently.")
+    public ResponseEntity<Void> dismissAlert(@PathVariable UUID id) {
+        perimeterAlertService.deleteAlert(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    public record EvaluateBreachRequest(
+            UUID targetId,
+            BigDecimal latitude,
+            BigDecimal longitude
+    ) {}
 }

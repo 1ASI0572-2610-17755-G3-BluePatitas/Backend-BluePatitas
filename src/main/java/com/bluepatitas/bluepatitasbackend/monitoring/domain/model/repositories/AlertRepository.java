@@ -41,6 +41,14 @@ public interface AlertRepository {
     List<PerimeterAlert> findAllActiveByTargetId(UUID targetId);
 
     /**
+     * Retrieves all breach-confirmed alerts for a given target.
+     *
+     * @param targetId the identifier of the monitored target
+     * @return a list of breach-confirmed perimeter alerts for the target
+     */
+    List<PerimeterAlert> findAllActiveBreachesByTargetId(UUID targetId);
+
+    /**
      * Retrieves all perimeter alerts in the system, regardless of status.
      *
      * @return a list of all perimeter alerts

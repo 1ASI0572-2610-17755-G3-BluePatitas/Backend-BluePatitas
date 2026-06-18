@@ -42,4 +42,9 @@ public class RelationalMonitoringZoneRepository implements MonitoringZoneReposit
     public List<MonitoringZone> findAllByShelterId(UUID shelterId) {
         return jpaMonitoringZoneRepository.findAllByShelterId(shelterId);
     }
+
+    @Override
+    public void deleteById(UUID id) {
+        jpaMonitoringZoneRepository.deleteById(id);
+    }
 }

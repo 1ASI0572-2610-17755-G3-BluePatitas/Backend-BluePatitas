@@ -108,6 +108,7 @@ public class WebSecurityConfiguration {
                                 "/uploads/**",
                                 "/api/monitoring/telemetry/**",
                                 "/api/monitoring/zones/public-list",
+                                "/api/monitoring/alerts/evaluate",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",

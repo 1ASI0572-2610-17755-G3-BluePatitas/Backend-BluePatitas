@@ -53,6 +53,8 @@ public class TelemetryAnalysisService {
                 command.ambientTemperature(),
                 command.ambientHumidity(),
                 command.visualData(),
+                command.latitude(),
+                command.longitude(),
                 LocalDateTime.now()
         );
 

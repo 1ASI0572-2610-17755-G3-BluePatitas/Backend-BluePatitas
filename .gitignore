@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Ignorar todo el contenido de la carpeta uploads
+uploads/*
+
+# Excepto el archivo .gitkeep
+!uploads/.gitkeep

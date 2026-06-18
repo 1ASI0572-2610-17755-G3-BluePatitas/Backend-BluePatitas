@@ -53,7 +53,9 @@ public class TelemetryController {
                 request.targetId(),
                 request.ambientTemperature(),
                 request.ambientHumidity(),
-                request.visualData()
+                request.visualData(),
+                request.latitude(),
+                request.longitude()
         );
 
         TelemetryRecord saved = telemetryAnalysisService.processTelemetry(command);
@@ -91,6 +93,8 @@ public class TelemetryController {
             UUID targetId,
             BigDecimal ambientTemperature,
             BigDecimal ambientHumidity,
-            String visualData
+            String visualData,
+            BigDecimal latitude,
+            BigDecimal longitude
     ) {}
 }

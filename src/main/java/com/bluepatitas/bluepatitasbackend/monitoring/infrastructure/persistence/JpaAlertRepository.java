@@ -25,6 +25,14 @@ public interface JpaAlertRepository extends JpaRepository<PerimeterAlert, UUID> 
     List<PerimeterAlert> findAllByTargetIdAndTrackingActiveTrue(UUID targetId);
 
     /**
+     * Fetches all alerts for a given target that have been breach-confirmed.
+     *
+     * @param targetId the monitored target's UUID
+     * @return list of breach-confirmed alerts
+     */
+    List<PerimeterAlert> findAllByTargetIdAndIsBreachConfirmedTrue(UUID targetId);
+
+    /**
      * Checks whether any alert exists for a given target.
      *
      * @param targetId the monitored target's UUID

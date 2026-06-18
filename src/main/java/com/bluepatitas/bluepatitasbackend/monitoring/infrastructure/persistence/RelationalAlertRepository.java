@@ -53,6 +53,12 @@ public class RelationalAlertRepository implements AlertRepository {
     }
 
     @Override
+    public List<PerimeterAlert> findAllActiveBreachesByTargetId(UUID targetId) {
+        log.debug("Fetching breach-confirmed alerts for targetId={}", targetId);
+        return jpaAlertRepository.findAllByTargetIdAndIsBreachConfirmedTrue(targetId);
+    }
+
+    @Override
     public List<PerimeterAlert> findAll() {
         log.debug("Fetching all perimeter alerts");
         return jpaAlertRepository.findAll();

@@ -177,6 +177,28 @@ public class AnimalManagementService {
         return updated;
     }
 
+    /**
+     * Deletes an animal from the platform.
+     *
+     * @param id the UUID of the animal to delete
+     */
+    @Transactional
+    public void deleteAnimal(UUID id) {
+        log.info("Deleting animal: id='{}'", id);
+        Animal animal = animalRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Animal not found with id: " + id));
+
+        UUID shelterId = getCurrentUserShelterId()
+                .orElseThrow(() -> new IllegalStateException("User is not associated with any shelter."));
+        if (!shelterId.equals(animal.getShelterId())) {
+            throw new SecurityException("You do not have permission to delete this animal.");
+        }
+
+        animalRepository.deleteById(id);
+        log.info("Animal DELETED with id={}", id);
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // Query Handlers (Read Side)
     // ─────────────────────────────────────────────────────────────────────────
