@@ -11,5 +11,6 @@ import java.util.UUID;
 public interface ShelterRepository {
     Shelter save(Shelter shelter);
     Optional<Shelter> findById(UUID id);
+    Optional<Shelter> findByName(String name);
     Optional<Shelter> findFirst();
 }
