@@ -103,6 +103,8 @@ public class WebSecurityConfiguration {
                 .sessionManagement( customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers(
+                                "/",
+                                "/error",
                                 "/api/v1/authentication/**",
                                 "/api/v1/roles/**",
                                 "/uploads/**",
