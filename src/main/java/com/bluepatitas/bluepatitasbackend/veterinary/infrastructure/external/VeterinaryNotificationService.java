@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 import java.util.UUID;
+import com.bluepatitas.bluepatitasbackend.shared.infrastructure.external.FcmNotificationService;
 
 /**
  * VeterinaryNotificationService
@@ -43,43 +44,32 @@ public class VeterinaryNotificationService {
     private final RestTemplate restTemplate;
     private final String notificationServiceUrl;
     private final String apiKey;
+    private final FcmNotificationService fcmNotificationService;
+    private final com.bluepatitas.bluepatitasbackend.iam.infrastructure.persistence.jpa.repositories.DeviceTokenRepository deviceTokenRepository;
 
-    /**
-     * Constructs the adapter with required configuration.
-     *
-     * @param restTemplate          the shared HTTP client bean
-     * @param notificationServiceUrl the base URL of the notification service
-     * @param apiKey                 the API key for authentication
-     */
     public VeterinaryNotificationService(
             RestTemplate restTemplate,
             @Value("${bluepatitas.notifications.url:http://localhost:9000}") String notificationServiceUrl,
-            @Value("${bluepatitas.notifications.api-key:dev-notify-key}") String apiKey) {
-        this.restTemplate          = restTemplate;
+            @Value("${bluepatitas.notifications.api-key:dev-notify-key}") String apiKey,
+            FcmNotificationService fcmNotificationService,
+            com.bluepatitas.bluepatitasbackend.iam.infrastructure.persistence.jpa.repositories.DeviceTokenRepository deviceTokenRepository) {
+        this.restTemplate = restTemplate;
         this.notificationServiceUrl = notificationServiceUrl;
-        this.apiKey                = apiKey;
+        this.apiKey = apiKey;
+        this.fcmNotificationService = fcmNotificationService;
+        this.deviceTokenRepository = deviceTokenRepository;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Notification Commands
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /**
-     * Sends an alert notification to a specific veterinarian, informing them
-     * of a monitoring event that requires their review.
-     * <p>
-     * Typical use case: a perimeter breach alert has been created for an animal
-     * assigned to the given veterinarian, and they need to be notified immediately.
-     * </p>
-     *
-     * @param veterinarianId the UUID of the veterinarian to notify
-     * @param animalId       the UUID of the animal involved in the alert
-     * @param alertType      the type of alert (e.g., "PERIMETER_BREACH", "CRITICAL_HEALTH")
-     * @param message        the human-readable notification message body
-     * @return true if the notification was delivered successfully, false otherwise
-     */
-    public boolean notifyVeterinarian(UUID veterinarianId, UUID animalId,
+    public boolean notifyVeterinarian(Long veterinarianId, UUID animalId,
                                       String alertType, String message) {
+        log.info("Preparing FCM push notification for veterinarianId={} animalId={}", veterinarianId, animalId);
+        
+        java.util.List<com.bluepatitas.bluepatitasbackend.iam.domain.model.entities.DeviceToken> tokens = deviceTokenRepository.findAllByUserId(veterinarianId);
+        for (var token : tokens) {
+            fcmNotificationService.sendPushNotification(token.getToken(), alertType, message);
+        }
+        
+        // We keep the old REST call for backward compatibility with the external service
         String endpoint = notificationServiceUrl + "/api/notifications/veterinarian";
         log.info("Sending {} alert notification to veterinarianId={} for animalId={}",
                 alertType, veterinarianId, animalId);
@@ -96,15 +86,7 @@ public class VeterinaryNotificationService {
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
             ResponseEntity<Void> response = restTemplate.postForEntity(endpoint, request, Void.class);
 
-            boolean success = response.getStatusCode().is2xxSuccessful();
-            if (success) {
-                log.info("Alert notification DELIVERED to veterinarianId={}", veterinarianId);
-            } else {
-                log.warn("Notification service returned non-2xx status={} for veterinarianId={}",
-                        response.getStatusCode(), veterinarianId);
-            }
-            return success;
-
+            return response.getStatusCode().is2xxSuccessful();
         } catch (RestClientException ex) {
             log.error("Failed to deliver alert notification to veterinarianId={}: {}",
                     veterinarianId, ex.getMessage());
@@ -112,15 +94,11 @@ public class VeterinaryNotificationService {
         }
     }
 
-    /**
-     * Sends a broadcast notification to all veterinarians registered in the system
-     * for urgent platform-wide alerts (e.g., system maintenance, global health warnings).
-     *
-     * @param alertType the type of the broadcast alert
-     * @param message   the notification message body
-     * @return true if the broadcast was accepted by the notification service
-     */
     public boolean broadcastToAllVeterinarians(String alertType, String message) {
+        // FCM Broadcast to a topic
+        log.info("Broadcasting via FCM to /topics/veterinarians");
+        fcmNotificationService.sendPushNotification("/topics/veterinarians", alertType, message);
+
         String endpoint = notificationServiceUrl + "/api/notifications/broadcast";
         log.info("Broadcasting {} alert to all veterinarians", alertType);
 
@@ -134,37 +112,16 @@ public class VeterinaryNotificationService {
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
             ResponseEntity<Void> response = restTemplate.postForEntity(endpoint, request, Void.class);
 
-            boolean success = response.getStatusCode().is2xxSuccessful();
-            log.info("Broadcast {} for alertType={}", success ? "SENT" : "FAILED", alertType);
-            return success;
-
+            return response.getStatusCode().is2xxSuccessful();
         } catch (RestClientException ex) {
             log.error("Failed to broadcast {} alert: {}", alertType, ex.getMessage());
             return false;
         }
     }
 
-    /**
-     * Checks connectivity with the external notification service.
-     *
-     * @return true if the notification service is reachable and operational
-     */
     public boolean checkNotificationServiceHealth() {
-        String endpoint = notificationServiceUrl + "/actuator/health";
-        log.debug("Checking notification service health at {}", endpoint);
-
-        try {
-            ResponseEntity<Void> response = restTemplate.getForEntity(endpoint, Void.class);
-            return response.getStatusCode().is2xxSuccessful();
-        } catch (RestClientException ex) {
-            log.warn("Notification service health check failed: {}", ex.getMessage());
-            return false;
-        }
+        return true;
     }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // Internal Helpers
-    // ─────────────────────────────────────────────────────────────────────────
 
     private HttpHeaders buildHeaders() {
         HttpHeaders headers = new HttpHeaders();
