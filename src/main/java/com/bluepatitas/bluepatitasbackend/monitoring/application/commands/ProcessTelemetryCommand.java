@@ -19,6 +19,8 @@ public record ProcessTelemetryCommand(
         UUID targetId,
         BigDecimal ambientTemperature,
         BigDecimal ambientHumidity,
-        String visualData
+        String visualData,
+        BigDecimal latitude,
+        BigDecimal longitude
 ) {
 }

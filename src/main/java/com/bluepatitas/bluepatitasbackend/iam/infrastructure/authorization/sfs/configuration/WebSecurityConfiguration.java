@@ -91,15 +91,11 @@ public class WebSecurityConfiguration {
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors(configurer -> configurer.configurationSource(request -> {
+        http.cors(configurer -> configurer.configurationSource(_ -> {
             var cors = new CorsConfiguration();
-            cors.setAllowedOriginPatterns(List.of(
-                    "http://localhost:*",
-                    "http://127.0.0.1:*"
-            ));
-            cors.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+            cors.setAllowedOrigins(List.of("*"));
+            cors.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
             cors.setAllowedHeaders(List.of("*"));
-            cors.setAllowCredentials(true);
             return cors;
         }));
         http.csrf(csrfConfigurer -> csrfConfigurer.disable())
@@ -107,11 +103,14 @@ public class WebSecurityConfiguration {
                 .sessionManagement( customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers(
+                                "/",
+                                "/error",
                                 "/api/v1/authentication/**",
                                 "/api/v1/roles/**",
                                 "/uploads/**",
                                 "/api/monitoring/telemetry/**",
                                 "/api/monitoring/zones/public-list",
+                                "/api/monitoring/alerts/evaluate",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",

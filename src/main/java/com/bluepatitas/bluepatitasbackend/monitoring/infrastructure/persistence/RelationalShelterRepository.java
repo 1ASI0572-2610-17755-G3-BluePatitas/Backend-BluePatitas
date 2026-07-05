@@ -28,11 +28,6 @@ public class RelationalShelterRepository implements ShelterRepository {
     }
 
     @Override
-    public Optional<Shelter> findByName(String name) {
-        return jpaShelterRepository.findByName(name);
-    }
-
-    @Override
     public Optional<Shelter> findFirst() {
         return jpaShelterRepository.findFirst();
     }

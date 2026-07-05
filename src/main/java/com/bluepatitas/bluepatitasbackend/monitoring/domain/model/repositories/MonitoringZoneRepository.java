@@ -15,4 +15,5 @@ public interface MonitoringZoneRepository {
     Optional<MonitoringZone> findByTargetId(UUID targetId);
     List<MonitoringZone> findAll();
     List<MonitoringZone> findAllByShelterId(UUID shelterId);
+    void deleteById(UUID id);
 }

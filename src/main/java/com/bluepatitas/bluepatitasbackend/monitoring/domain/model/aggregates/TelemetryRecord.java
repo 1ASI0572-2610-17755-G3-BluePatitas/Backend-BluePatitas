@@ -45,6 +45,12 @@ public class TelemetryRecord {
     @Column(name = "visual_data", columnDefinition = "TEXT")
     private String visualData;
 
+    @Column(name = "latitude", precision = 10, scale = 7)
+    private BigDecimal latitude;
+
+    @Column(name = "longitude", precision = 10, scale = 7)
+    private BigDecimal longitude;
+
     /** Timestamp when this telemetry record was captured. */
     @Column(name = "recorded_at", nullable = false)
     private LocalDateTime recordedAt;
@@ -57,16 +63,21 @@ public class TelemetryRecord {
      * @param ambientTemperature  current temperature reading
      * @param ambientHumidity     current humidity reading
      * @param visualData          raw visual data payload
+     * @param latitude            current GPS latitude
+     * @param longitude           current GPS longitude
      * @param recordedAt          timestamp of the reading
      */
     public TelemetryRecord(UUID id, UUID targetId, BigDecimal ambientTemperature,
                            BigDecimal ambientHumidity, String visualData,
+                           BigDecimal latitude, BigDecimal longitude,
                            LocalDateTime recordedAt) {
         this.id = id;
         this.targetId = targetId;
         this.ambientTemperature = ambientTemperature;
         this.ambientHumidity = ambientHumidity;
         this.visualData = visualData;
+        this.latitude = latitude;
+        this.longitude = longitude;
         this.recordedAt = recordedAt;
     }
 

@@ -48,6 +48,16 @@ public class PerimeterAlertService {
 
         LocationContext coordinates = new LocationContext(command.latitude(), command.longitude());
 
+        // Check if there is already an active (unresolved) breach alert for this target
+        List<PerimeterAlert> activeAlerts = alertRepository.findAllActiveBreachesByTargetId(command.targetId());
+        if (!activeAlerts.isEmpty()) {
+            PerimeterAlert existing = activeAlerts.get(0);
+            log.info("Active breach alert already exists for targetId={}, alertId={}. Updating coordinates.",
+                    command.targetId(), existing.getId());
+            existing.updateCoordinates(coordinates);
+            return alertRepository.save(existing);
+        }
+
         PerimeterAlert alert = new PerimeterAlert(
                 UUID.randomUUID(),
                 command.targetId(),
@@ -136,5 +146,16 @@ public class PerimeterAlertService {
     public List<PerimeterAlert> getAllAlerts() {
         log.info("Fetching all perimeter alerts");
         return alertRepository.findAll();
+    }
+
+    /**
+     * Deletes a perimeter alert from the system.
+     *
+     * @param alertId the unique identifier of the alert to delete
+     */
+    @Transactional
+    public void deleteAlert(UUID alertId) {
+        log.info("Deleting perimeter alert with id={}", alertId);
+        alertRepository.deleteById(alertId);
     }
 }

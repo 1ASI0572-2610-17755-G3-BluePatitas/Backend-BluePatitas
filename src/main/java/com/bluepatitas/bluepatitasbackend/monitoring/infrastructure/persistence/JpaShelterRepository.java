@@ -11,8 +11,6 @@ import java.util.UUID;
  * JpaShelterRepository
  */
 public interface JpaShelterRepository extends JpaRepository<Shelter, UUID> {
-    Optional<Shelter> findByName(String name);
-
     @Query(value = "SELECT * FROM monitoring_shelters LIMIT 1", nativeQuery = true)
     Optional<Shelter> findFirst();
 }

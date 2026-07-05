@@ -15,6 +15,9 @@ public record CreateMonitoringZoneCommand(
         Boolean cameraEnabled,
         String imageUrl,
         Double minTemperatureC,
-        Double maxTemperatureC
+        Double maxTemperatureC,
+        Double geofenceLatitude,
+        Double geofenceLongitude,
+        Double geofenceRadiusMeters
 ) {
 }
