@@ -157,7 +157,10 @@ public class DemoDataSeedEventHandler {
                 true,
                 "/uploads/demo-zone.jpg",
                 10.0,
-                35.0
+                35.0,
+                0.0,
+                0.0,
+                0.0
         ));
     }
 

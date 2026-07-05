@@ -12,4 +12,5 @@ public interface ShelterRepository {
     Shelter save(Shelter shelter);
     Optional<Shelter> findById(UUID id);
     Optional<Shelter> findFirst();
+    Optional<Shelter> findByName(String name);
 }
