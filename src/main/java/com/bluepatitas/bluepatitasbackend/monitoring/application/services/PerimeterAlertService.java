@@ -8,6 +8,12 @@ import com.bluepatitas.bluepatitasbackend.monitoring.domain.model.valueobjects.L
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import com.bluepatitas.bluepatitasbackend.iam.domain.model.entities.DeviceToken;
+import com.bluepatitas.bluepatitasbackend.iam.infrastructure.persistence.jpa.repositories.DeviceTokenRepository;
+import com.bluepatitas.bluepatitasbackend.shared.infrastructure.external.FcmNotificationService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -28,6 +34,8 @@ import java.util.UUID;
 public class PerimeterAlertService {
 
     private final AlertRepository alertRepository;
+    private final FcmNotificationService fcmNotificationService;
+    private final DeviceTokenRepository deviceTokenRepository;
 
     // ─────────────────────────────────────────────────────────────────────────
     // Command Handlers (Write Side)
@@ -71,6 +79,17 @@ public class PerimeterAlertService {
 
         PerimeterAlert saved = alertRepository.save(alert);
         log.warn("Perimeter breach CONFIRMED for targetId={}, alertId={}", command.targetId(), saved.getId());
+
+        // Send Push Notification
+        List<DeviceToken> tokens = deviceTokenRepository.findAll();
+        for (DeviceToken token : tokens) {
+            fcmNotificationService.sendPushNotification(
+                token.getToken(), 
+                "Alerta de Perímetro", 
+                "¡Alerta! Un animal ha salido de la geocerca. Revise el sistema inmediatamente."
+            );
+        }
+
         return saved;
     }
 

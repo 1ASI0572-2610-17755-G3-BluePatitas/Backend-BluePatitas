@@ -17,9 +17,21 @@ public class FirebaseConfig {
     public void initialize() {
         try {
             if (FirebaseApp.getApps().isEmpty()) {
-                InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream("firebase-service-account.json");
+                InputStream serviceAccount = null;
+                
+                String firebaseEnv = System.getenv("FIREBASE_CREDENTIALS");
+                if (firebaseEnv != null && !firebaseEnv.trim().isEmpty()) {
+                    serviceAccount = new java.io.ByteArrayInputStream(firebaseEnv.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                    log.info("Loaded Firebase credentials from environment variable FIREBASE_CREDENTIALS");
+                } else {
+                    serviceAccount = getClass().getClassLoader().getResourceAsStream("firebase-service-account.json");
+                    if (serviceAccount != null) {
+                        log.info("Loaded Firebase credentials from classpath file.");
+                    }
+                }
+
                 if (serviceAccount == null) {
-                    log.error("Firebase Service Account JSON file not found in classpath.");
+                    log.error("Firebase credentials not found. Neither FIREBASE_CREDENTIALS env var nor firebase-service-account.json file exist.");
                     return;
                 }
 
