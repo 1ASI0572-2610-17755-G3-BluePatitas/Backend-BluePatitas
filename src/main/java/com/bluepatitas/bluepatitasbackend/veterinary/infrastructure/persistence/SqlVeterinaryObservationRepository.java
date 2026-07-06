@@ -54,7 +54,7 @@ public class SqlVeterinaryObservationRepository implements VeterinaryObservation
     }
 
     @Override
-    public List<VeterinaryObservation> findAllByVeterinarianId(UUID veterinarianId) {
+    public List<VeterinaryObservation> findAllByVeterinarianId(Long veterinarianId) {
         log.debug("Fetching veterinary observations by veterinarianId={}", veterinarianId);
         return jpaObservationRepository.findAllByVeterinarianId(veterinarianId);
     }

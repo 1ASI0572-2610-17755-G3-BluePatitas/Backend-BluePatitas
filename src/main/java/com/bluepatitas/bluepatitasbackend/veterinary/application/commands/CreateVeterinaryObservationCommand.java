@@ -12,12 +12,12 @@ import java.util.UUID;
  * </p>
  *
  * @param animalId       the UUID of the animal being observed
- * @param veterinarianId the UUID of the veterinarian creating the observation
+ * @param veterinarianId the numeric user id of the veterinarian creating the observation
  * @param description    the clinical description of the observation
  */
 public record CreateVeterinaryObservationCommand(
         UUID animalId,
-        UUID veterinarianId,
+        Long veterinarianId,
         String description
 ) {
 }

@@ -1,5 +1,10 @@
 package com.bluepatitas.bluepatitasbackend.veterinary.application.services;
 
+import com.bluepatitas.bluepatitasbackend.animals.domain.model.aggregates.Animal;
+import com.bluepatitas.bluepatitasbackend.animals.domain.model.repositories.AnimalRepository;
+import com.bluepatitas.bluepatitasbackend.iam.domain.model.aggregates.User;
+import com.bluepatitas.bluepatitasbackend.iam.domain.model.valueobjects.RoleType;
+import com.bluepatitas.bluepatitasbackend.iam.infrastructure.persistence.jpa.repositories.UserRepository;
 import com.bluepatitas.bluepatitasbackend.veterinary.application.commands.AddVeterinaryRecommendationCommand;
 import com.bluepatitas.bluepatitasbackend.veterinary.application.commands.CreateVeterinaryObservationCommand;
 import com.bluepatitas.bluepatitasbackend.veterinary.domain.model.aggregates.VeterinaryObservation;
@@ -8,11 +13,13 @@ import com.bluepatitas.bluepatitasbackend.veterinary.domain.model.repositories.V
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -41,6 +48,8 @@ public class VeterinaryObservationCommandHandler {
 
     private final VeterinaryObservationRepository observationRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final AnimalRepository animalRepository;
+    private final UserRepository userRepository;
 
     // ─────────────────────────────────────────────────────────────────────────
     // Command Handlers (Write Side)
@@ -61,10 +70,14 @@ public class VeterinaryObservationCommandHandler {
         log.info("Creating VeterinaryObservation for animalId={}, veterinarianId={}",
                 command.animalId(), command.veterinarianId());
 
+        Animal animal = animalRepository.findById(command.animalId())
+                .orElseThrow(() -> new NoSuchElementException("Animal not found with id: " + command.animalId()));
+        Long veterinarianId = resolveVeterinarianId(command.veterinarianId(), animal);
+
         VeterinaryObservation observation = VeterinaryObservation.create(
                 UUID.randomUUID(),
                 command.animalId(),
-                command.veterinarianId(),
+                veterinarianId,
                 command.description()
         );
 
@@ -149,5 +162,49 @@ public class VeterinaryObservationCommandHandler {
     public List<VeterinaryObservation> getAllObservations() {
         log.info("Fetching all veterinary observations");
         return observationRepository.findAll();
+    }
+
+    private Long resolveVeterinarianId(Long requestedVeterinarianId, Animal animal) {
+        Optional<User> authenticatedUser = currentUser();
+        if (authenticatedUser.isPresent() && isVeterinarian(authenticatedUser.get())) {
+            User veterinarian = authenticatedUser.get();
+            if (requestedVeterinarianId != null && !requestedVeterinarianId.equals(veterinarian.getId())) {
+                throw new IllegalArgumentException("VeterinarianId does not match the authenticated veterinarian.");
+            }
+            validateVeterinarianShelter(veterinarian, animal);
+            return veterinarian.getId();
+        }
+
+        if (requestedVeterinarianId == null) {
+            throw new IllegalArgumentException("VeterinarianId is required.");
+        }
+
+        User veterinarian = userRepository.findById(requestedVeterinarianId)
+                .orElseThrow(() -> new NoSuchElementException("Veterinarian not found with id: " + requestedVeterinarianId));
+        if (!isVeterinarian(veterinarian)) {
+            throw new NoSuchElementException("Veterinarian not found with id: " + requestedVeterinarianId);
+        }
+        validateVeterinarianShelter(veterinarian, animal);
+        return veterinarian.getId();
+    }
+
+    private Optional<User> currentUser() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return Optional.empty();
+        }
+        return userRepository.findByEmail(authentication.getName());
+    }
+
+    private boolean isVeterinarian(User user) {
+        return user.getRoles().stream()
+                .anyMatch(role -> RoleType.ROLE_VETERINARIAN.equals(role.getName()));
+    }
+
+    private void validateVeterinarianShelter(User veterinarian, Animal animal) {
+        if (veterinarian.getShelterId() != null && animal.getShelterId() != null
+                && !veterinarian.getShelterId().equals(animal.getShelterId())) {
+            throw new IllegalArgumentException("Animal does not belong to the authenticated veterinarian's shelter.");
+        }
     }
 }
