@@ -107,6 +107,7 @@ public class WebSecurityConfiguration {
                                 "/error",
                                 "/api/v1/authentication/**",
                                 "/api/v1/roles/**",
+                                "/api/veterinary/veterinarians/redeem-code",
                                 "/uploads/**",
                                 "/api/monitoring/telemetry/**",
                                 "/api/monitoring/zones/public-list",
