@@ -11,7 +11,6 @@ import com.bluepatitas.bluepatitasbackend.monitoring.domain.model.aggregates.Mon
 import com.bluepatitas.bluepatitasbackend.monitoring.domain.model.aggregates.Shelter;
 import com.bluepatitas.bluepatitasbackend.monitoring.domain.model.repositories.MonitoringZoneRepository;
 import com.bluepatitas.bluepatitasbackend.monitoring.domain.model.repositories.ShelterRepository;
-import com.bluepatitas.bluepatitasbackend.animals.domain.model.repositories.AnimalRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -38,7 +37,6 @@ public class ShelterMonitoringService {
     private final ShelterRepository shelterRepository;
     private final MonitoringZoneRepository monitoringZoneRepository;
     private final UserRepository userRepository;
-    private final AnimalRepository animalRepository;
 
     private Optional<User> getCurrentUser() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -210,25 +208,13 @@ public class ShelterMonitoringService {
         log.info("Fetching all monitoring zones.");
         return getCurrentUser()
                 .filter(user -> user.getShelterId() != null)
-                .map(user -> {
-                    List<MonitoringZone> zones = monitoringZoneRepository.findAllByShelterId(user.getShelterId());
-                    for (MonitoringZone zone : zones) {
-                        int count = animalRepository.findAllByAssignedPerimeterId(zone.getId()).size();
-                        zone.setAnimalCount(count);
-                    }
-                    return zones;
-                })
+                .map(user -> monitoringZoneRepository.findAllByShelterId(user.getShelterId()))
                 .orElse(Collections.emptyList());
     }
 
     @Transactional(readOnly = true)
     public List<MonitoringZone> getMonitoringZonesWithoutAuth() {
         log.info("Fetching all monitoring zones without authentication context.");
-        List<MonitoringZone> zones = monitoringZoneRepository.findAll();
-        for (MonitoringZone zone : zones) {
-            int count = animalRepository.findAllByAssignedPerimeterId(zone.getId()).size();
-            zone.setAnimalCount(count);
-        }
-        return zones;
+        return monitoringZoneRepository.findAll();
     }
 }

@@ -23,11 +23,12 @@ import com.bluepatitas.bluepatitasbackend.veterinary.domain.model.aggregates.Vet
 import com.bluepatitas.bluepatitasbackend.veterinary.domain.model.repositories.VeterinaryObservationRepository;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.jdbc.core.ConnectionCallback;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,6 +46,7 @@ public class DemoDataSeedEventHandler {
     private final FeedingPlanRepository feedingPlanRepository;
     private final VeterinaryObservationRepository veterinaryObservationRepository;
     private final HashingService hashingService;
+    private final JdbcTemplate jdbcTemplate;
 
     public DemoDataSeedEventHandler(
             RoleRepository roleRepository,
@@ -54,7 +56,8 @@ public class DemoDataSeedEventHandler {
             MonitoringZoneRepository monitoringZoneRepository,
             FeedingPlanRepository feedingPlanRepository,
             VeterinaryObservationRepository veterinaryObservationRepository,
-            HashingService hashingService) {
+            HashingService hashingService,
+            JdbcTemplate jdbcTemplate) {
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
         this.shelterRepository = shelterRepository;
@@ -63,6 +66,7 @@ public class DemoDataSeedEventHandler {
         this.feedingPlanRepository = feedingPlanRepository;
         this.veterinaryObservationRepository = veterinaryObservationRepository;
         this.hashingService = hashingService;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @EventListener
@@ -78,6 +82,7 @@ public class DemoDataSeedEventHandler {
         List<Animal> animals = ensureDemoAnimals(shelter.getId());
         ensureDemoMonitoringZone(shelter.getId(), animals);
         ensureDemoFeedingPlan(animals);
+        normalizeLegacyVeterinaryObservationVeterinarianIds(veterinarian);
         ensureDemoVeterinaryObservations(animals, veterinarian);
     }
 
@@ -190,18 +195,64 @@ public class DemoDataSeedEventHandler {
         if (veterinaryObservationRepository.existsByAnimalId(animal.getId())) {
             return;
         }
-        UUID veterinarianId = stableVeterinarianUuid(veterinarian);
         VeterinaryObservation observation = VeterinaryObservation.create(
                 UUID.randomUUID(),
                 animal.getId(),
-                veterinarianId,
+                veterinarian.getId(),
                 "Demo observation: animal is stable and eating normally."
         );
         observation.addRecommendation("Maintain balanced diet and observe hydration.");
         veterinaryObservationRepository.save(observation);
     }
 
-    private UUID stableVeterinarianUuid(User veterinarian) {
-        return UUID.nameUUIDFromBytes(("user:" + veterinarian.getId()).getBytes(StandardCharsets.UTF_8));
+    private void normalizeLegacyVeterinaryObservationVeterinarianIds(User veterinarian) {
+        if (isVeterinaryObservationVeterinarianIdBigint()) {
+            return;
+        }
+
+        if (!columnExists("veterinary_observations", "veterinarian_user_id")) {
+            jdbcTemplate.execute("ALTER TABLE veterinary_observations ADD COLUMN veterinarian_user_id BIGINT NULL");
+        }
+        jdbcTemplate.update("""
+                UPDATE veterinary_observations
+                SET veterinarian_user_id = ?
+                WHERE veterinarian_user_id IS NULL
+                """, veterinarian.getId());
+        jdbcTemplate.execute("ALTER TABLE veterinary_observations DROP COLUMN veterinarian_id");
+        if (isPostgreSql()) {
+            jdbcTemplate.execute("ALTER TABLE veterinary_observations RENAME COLUMN veterinarian_user_id TO veterinarian_id");
+            jdbcTemplate.execute("ALTER TABLE veterinary_observations ALTER COLUMN veterinarian_id SET NOT NULL");
+            return;
+        }
+        jdbcTemplate.execute("""
+                ALTER TABLE veterinary_observations
+                CHANGE COLUMN veterinarian_user_id veterinarian_id BIGINT NOT NULL
+                """);
+    }
+
+    private boolean isVeterinaryObservationVeterinarianIdBigint() {
+        List<String> dataTypes = jdbcTemplate.query("""
+                SELECT DATA_TYPE
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE LOWER(TABLE_NAME) = LOWER(?)
+                  AND LOWER(COLUMN_NAME) = LOWER(?)
+                """, (rs, rowNum) -> rs.getString(1), "veterinary_observations", "veterinarian_id");
+        return dataTypes.stream().anyMatch(dataType -> "bigint".equalsIgnoreCase(dataType));
+    }
+
+    private boolean columnExists(String tableName, String columnName) {
+        Integer count = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*)
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE LOWER(TABLE_NAME) = LOWER(?)
+                  AND LOWER(COLUMN_NAME) = LOWER(?)
+                """, Integer.class, tableName, columnName);
+        return count != null && count > 0;
+    }
+
+    private boolean isPostgreSql() {
+        String productName = jdbcTemplate.execute((ConnectionCallback<String>) connection ->
+                connection.getMetaData().getDatabaseProductName());
+        return productName != null && productName.toLowerCase().contains("postgresql");
     }
 }
