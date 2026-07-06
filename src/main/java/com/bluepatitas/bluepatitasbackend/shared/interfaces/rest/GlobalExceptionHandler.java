@@ -7,6 +7,7 @@ import org.jspecify.annotations.NullMarked;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
+import java.util.NoSuchElementException;
 import java.util.ResourceBundle;
 
 /**
@@ -66,6 +68,38 @@ public class GlobalExceptionHandler {
                 ex.getMessage() != null ? ex.getMessage() : resolveMessageOrDefault("validation.request.failed", "Request validation failed")
         );
         return ErrorResponseAssembler.toErrorResponseFromApplicationError(applicationError);
+    }
+
+    /**
+     * Handles malformed JSON or values that cannot be converted to request DTO types.
+     *
+     * @param ex the unreadable HTTP message exception
+     * @return error response with BAD_REQUEST status
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResource> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+        return ResponseEntity.badRequest()
+                .body(new ErrorResource(
+                        "VALIDATION_ERROR",
+                        "Invalid request body",
+                        "Request body contains invalid or unsupported values."
+                ));
+    }
+
+    /**
+     * Handles missing resources from application services.
+     *
+     * @param ex the not found exception
+     * @return error response with NOT_FOUND status
+     */
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseEntity<ErrorResource> handleNoSuchElementException(NoSuchElementException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResource(
+                        "RESOURCE_NOT_FOUND",
+                        "Resource not found",
+                        ex.getMessage() != null ? ex.getMessage() : "Requested resource was not found."
+                ));
     }
 
     /**

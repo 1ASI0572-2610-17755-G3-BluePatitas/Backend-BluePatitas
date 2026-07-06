@@ -27,10 +27,10 @@ public interface JpaVeterinaryObservationRepository extends JpaRepository<Veteri
     /**
      * Fetches all veterinary observations recorded by a specific veterinarian.
      *
-     * @param veterinarianId the UUID of the veterinarian
+     * @param veterinarianId the numeric user id of the veterinarian
      * @return list of observations created by that veterinarian
      */
-    List<VeterinaryObservation> findAllByVeterinarianId(UUID veterinarianId);
+    List<VeterinaryObservation> findAllByVeterinarianId(Long veterinarianId);
 
     /**
      * Checks whether any observation has been recorded for a given animal.

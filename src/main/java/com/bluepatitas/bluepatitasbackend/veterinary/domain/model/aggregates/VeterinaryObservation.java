@@ -34,7 +34,7 @@ public class VeterinaryObservation {
 
     /** The veterinarian who created this observation. */
     @Column(name = "veterinarian_id", nullable = false)
-    private UUID veterinarianId;
+    private Long veterinarianId;
 
     /** Clinical description of the animal's condition at the time of observation. */
     @Column(name = "description", nullable = false, columnDefinition = "TEXT")
@@ -64,13 +64,13 @@ public class VeterinaryObservation {
      *
      * @param id              unique identifier
      * @param animalId        the animal being observed
-     * @param veterinarianId  the veterinarian recording the observation
+     * @param veterinarianId  the numeric user id of the veterinarian recording the observation
      * @param description     the clinical description of the observation
      * @return a new VeterinaryObservation with no recommendation set
      * @throws IllegalArgumentException if any required argument is null or blank
      */
     public static VeterinaryObservation create(UUID id, UUID animalId,
-                                               UUID veterinarianId, String description) {
+                                               Long veterinarianId, String description) {
         if (id == null)                              throw new IllegalArgumentException("VeterinaryObservation id must not be null.");
         if (animalId == null)                        throw new IllegalArgumentException("AnimalId must not be null.");
         if (veterinarianId == null)                  throw new IllegalArgumentException("VeterinarianId must not be null.");

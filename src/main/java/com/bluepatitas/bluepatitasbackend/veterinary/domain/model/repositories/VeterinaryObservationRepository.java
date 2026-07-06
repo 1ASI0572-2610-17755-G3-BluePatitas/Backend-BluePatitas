@@ -44,10 +44,10 @@ public interface VeterinaryObservationRepository {
     /**
      * Retrieves all observations recorded by a specific veterinarian.
      *
-     * @param veterinarianId the UUID of the veterinarian
+     * @param veterinarianId the numeric user id of the veterinarian
      * @return a list of observations created by that veterinarian
      */
-    List<VeterinaryObservation> findAllByVeterinarianId(UUID veterinarianId);
+    List<VeterinaryObservation> findAllByVeterinarianId(Long veterinarianId);
 
     /**
      * Retrieves all veterinary observations in the system.

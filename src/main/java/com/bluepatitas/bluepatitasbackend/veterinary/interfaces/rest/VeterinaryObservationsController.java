@@ -131,7 +131,7 @@ public class VeterinaryObservationsController {
     /** Request body for POST /api/veterinary/observations. */
     public record CreateObservationRequest(
             UUID animalId,
-            UUID veterinarianId,
+            Long veterinarianId,
             String description
     ) {}
 
